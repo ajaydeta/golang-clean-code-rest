@@ -11,3 +11,7 @@ func New(reg registry.ServiceRegistry) *Handler {
 		serviceReg: reg,
 	}
 }
+
+func (h *Handler) GetServiceRegistry() registry.ServiceRegistry {
+	return h.serviceReg
+}

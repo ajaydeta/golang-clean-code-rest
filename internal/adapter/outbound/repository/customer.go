@@ -20,8 +20,10 @@ type (
 	}
 )
 
-func NewCustomerRepository() repository.CustomerRepository {
-	return &CustomerRepository{}
+func NewCustomerRepository(db *gorm.DB) repository.CustomerRepository {
+	return &CustomerRepository{
+		db: db,
+	}
 }
 
 func (c *CustomerRepository) FindByID() {

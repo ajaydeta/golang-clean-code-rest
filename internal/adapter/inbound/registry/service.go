@@ -9,14 +9,20 @@ import (
 
 type ServiceRegistry struct {
 	customerSvc service.CustomerService
-}
-
-func (s ServiceRegistry) GetCustomerService() service.CustomerService {
-	panic("implement me")
+	productSvc  service.ProductService
 }
 
 func NewServiceRegistry(reg oreg.RepositoryRegistry) ireg.ServiceRegistry {
 	return &ServiceRegistry{
 		customerSvc: iservice.NewAccountService(reg),
+		productSvc:  iservice.NewProductService(reg),
 	}
+}
+
+func (s *ServiceRegistry) GetCustomerService() service.CustomerService {
+	return s.customerSvc
+}
+
+func (s *ServiceRegistry) GetProductService() service.ProductService {
+	return s.productSvc
 }
