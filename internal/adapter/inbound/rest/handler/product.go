@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/gofiber/fiber/v2"
+	errors "github.com/rotisserie/eris"
 	productDto "synapsis-challenge/internal/adapter/inbound/rest/handler/dto/product"
 	"synapsis-challenge/shared"
 )
@@ -45,12 +46,12 @@ func (h *Handler) GetProduct(c *fiber.Ctx) error {
 
 	product, err := svc.FindId(c.UserContext(), c.Params("id"))
 	if err != nil {
+		if errors.Is(err, shared.ErrNotFound) {
+			return resp.APIStatusNotFound().Send(c)
+		}
+
 		resp.SetMessage("internal server error").SetReason(err)
 		return resp.Send(c)
-	}
-
-	if product == nil {
-		return resp.APIStatusNotFound().Send(c)
 	}
 
 	return resp.SetData(respDto.ToResponse(product)).APIStatusSuccess().Send(c)

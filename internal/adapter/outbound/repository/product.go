@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 	"synapsis-challenge/internal/core/domain"
 	"synapsis-challenge/internal/core/port/outbound/repository"
+	"synapsis-challenge/shared"
 	"time"
 )
 
@@ -16,11 +17,11 @@ type (
 	}
 
 	Product struct {
-		ID              string            `json:"id" gorm:"primaryKey"`
-		Name            string            `json:"name"`
-		Price           float64           `json:"price"`
-		CreatedAt       time.Time         `json:"created_at"`
-		ProductCategory []ProductCategory `json:"product_category"`
+		ID              string `gorm:"primaryKey"`
+		Name            string
+		Price           float64
+		CreatedAt       time.Time
+		ProductCategory []ProductCategory
 	}
 
 	ProductCategory struct {
@@ -71,7 +72,10 @@ func (i *ProductRepository) FindById(ctx context.Context, id string) (*domain.Pr
 		First(model).
 		Error
 	if err != nil {
-		return nil, errors.Wrap(err, "failed Find")
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, shared.ErrNotFound
+		}
+		return nil, errors.Wrap(err, "failed First")
 	}
 
 	copier.CopyWithOption(&result, model, copier.Option{DeepCopy: true})

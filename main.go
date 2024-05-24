@@ -14,9 +14,10 @@ func main() {
 	godotenv.Load()
 	app := fiber.New()
 
-	db := config.GetMySQL()
+	db := config.InitMySQL()
+	rdb := config.InitRedis()
 
-	repoReg := oreg.NewRepositoryRegistry(db)
+	repoReg := oreg.NewRepositoryRegistry(rdb, db)
 	serviceReg := ireg.NewServiceRegistry(repoReg)
 	h := handler.New(serviceReg)
 

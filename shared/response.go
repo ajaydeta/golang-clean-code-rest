@@ -1,6 +1,9 @@
 package shared
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"github.com/gofiber/fiber/v2"
+	errors "github.com/rotisserie/eris"
+)
 
 type JSONResponse struct {
 	Data    any    `json:"data,omitempty"`
@@ -63,6 +66,17 @@ func (r *JSONResponse) APIStatusNotFound() *JSONResponse {
 	return r
 }
 
+func (r *JSONResponse) APIStatusBadRequest() *JSONResponse {
+	r.Code = fiber.StatusBadRequest
+	r.Message = "Bad Request"
+	return r
+}
+
 func (r *JSONResponse) Send(c *fiber.Ctx) error {
 	return c.Status(r.Code).JSON(r)
 }
+
+var (
+	ErrAlreadyExist = errors.New("already exist")
+	ErrNotFound     = errors.New("not found")
+)

@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 	errors "github.com/rotisserie/eris"
-	"gorm.io/gorm"
 	"synapsis-challenge/internal/core/domain"
 	"synapsis-challenge/internal/core/port/outbound/registry"
+	"synapsis-challenge/shared"
 )
 
 type ProductService struct {
@@ -56,7 +56,11 @@ func (i *ProductService) FindId(ctx context.Context, id string) (*domain.Product
 	)
 
 	result, err = productRepo.FindById(ctx, id)
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+	if err != nil {
+		if errors.Is(err, shared.ErrNotFound) {
+			return nil, shared.ErrNotFound
+		}
+
 		return nil, errors.Wrap(err, "error productRepo.FindById")
 	}
 

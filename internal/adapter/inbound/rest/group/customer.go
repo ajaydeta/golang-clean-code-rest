@@ -6,6 +6,5 @@ import (
 )
 
 func NewCustomerRequest(app *fiber.App, handler *handler.Handler) {
-	customer := app.Group("/customer")
-	customer.Get("/", handler.GetCustomers)
+	app.Post("/register", handler.Register)
 }

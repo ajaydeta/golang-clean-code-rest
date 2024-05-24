@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 	outrepo "synapsis-challenge/internal/adapter/outbound/repository"
 	"synapsis-challenge/internal/core/port/outbound/registry"
@@ -12,9 +13,11 @@ type RepositoryRegistry struct {
 	productRepo  repository.ProductRepository
 }
 
-func NewRepositoryRegistry(db *gorm.DB) registry.RepositoryRegistry {
+func NewRepositoryRegistry(rdb *redis.Client, db *gorm.DB) registry.RepositoryRegistry {
+	redisRepo := outrepo.NewRedisRepository(rdb)
+
 	return &RepositoryRegistry{
-		customerRepo: outrepo.NewCustomerRepository(db),
+		customerRepo: outrepo.NewCustomerRepository(db, redisRepo),
 		productRepo:  outrepo.NewProductRepository(db),
 	}
 }
