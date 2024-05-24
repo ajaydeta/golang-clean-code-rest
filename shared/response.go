@@ -77,6 +77,7 @@ func (r *JSONResponse) Send(c *fiber.Ctx) error {
 }
 
 var (
-	ErrAlreadyExist = errors.New("already exist")
-	ErrNotFound     = errors.New("not found")
+	ErrAlreadyExist    = errors.New("already exist")
+	ErrNotFound        = errors.New("not found")
+	ErrInvalidPassword = errors.New("invalid password")
 )

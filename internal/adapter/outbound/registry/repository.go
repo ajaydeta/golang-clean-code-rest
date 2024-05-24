@@ -9,6 +9,7 @@ import (
 )
 
 type RepositoryRegistry struct {
+	redisRepo    repository.RedisRepository
 	customerRepo repository.CustomerRepository
 	productRepo  repository.ProductRepository
 }
@@ -17,9 +18,14 @@ func NewRepositoryRegistry(rdb *redis.Client, db *gorm.DB) registry.RepositoryRe
 	redisRepo := outrepo.NewRedisRepository(rdb)
 
 	return &RepositoryRegistry{
+		redisRepo:    redisRepo,
 		customerRepo: outrepo.NewCustomerRepository(db, redisRepo),
 		productRepo:  outrepo.NewProductRepository(db),
 	}
+}
+
+func (r *RepositoryRegistry) GetRedisRepository() repository.RedisRepository {
+	return r.redisRepo
 }
 
 func (r *RepositoryRegistry) GetCustomerRepository() repository.CustomerRepository {

@@ -10,4 +10,10 @@ type (
 		Password  string
 		CreatedAt time.Time
 	}
+
+	SignIn struct {
+		RefreshToken string
+		AccessToken  string
+		Customer     *Customer
+	}
 )

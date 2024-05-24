@@ -1,7 +1,6 @@
 package shared
 
 import (
-	"fmt"
 	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
 	"os"
@@ -39,7 +38,7 @@ func ComparePassword(storedHash, userPassword string) (bool, error) {
 	if err != nil {
 		err = bcrypt.CompareHashAndPassword(hashedMasterPassword, []byte(salted))
 		if err != nil {
-			return false, fmt.Errorf("invalid [password]")
+			return false, ErrInvalidPassword
 		}
 	}
 

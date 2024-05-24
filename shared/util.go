@@ -3,6 +3,15 @@ package shared
 import (
 	"strconv"
 	"strings"
+	"time"
+)
+
+const (
+	AccessTokenSubject  = "access_token"
+	RefreshTokenSubject = "refresh_token"
+
+	AccessTokenDuration  = time.Hour * 24
+	RefreshTokenDuration = time.Hour * 24 * 7
 )
 
 func GetPageAndPerPage(limit, offset int64) (int64, int64) {
