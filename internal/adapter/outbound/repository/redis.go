@@ -18,6 +18,10 @@ func (i *RedisRepository) Set(key string, value interface{}, expiration time.Dur
 	return i.rdb.Set(context.Background(), key, value, expiration).Err()
 }
 
+func (i *RedisRepository) GetString(key string) (string, error) {
+	return i.rdb.Get(context.Background(), key).Result()
+}
+
 func (i *RedisRepository) IsExist(key string) (bool, error) {
 	exist, err := i.rdb.Exists(context.Background(), key).Result()
 	if err != nil {

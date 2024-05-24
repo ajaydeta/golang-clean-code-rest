@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
 	"synapsis-challenge/config"
 	ireg "synapsis-challenge/internal/adapter/inbound/registry"
@@ -13,6 +14,11 @@ import (
 func main() {
 	godotenv.Load()
 	app := fiber.New()
+	app.Use(logger.New(logger.Config{
+		TimeZone:   "Asia/Jakarta",
+		Format:     "${pid} [${ip}]:${port} ${locals:requestid} ${status} - ${method} ${path}  ${latency}\n",
+		TimeFormat: "02-Jan-2006",
+	}))
 
 	db := config.InitMySQL()
 	rdb := config.InitRedis()

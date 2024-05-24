@@ -7,6 +7,7 @@ import (
 
 func NewProductRequest(app *fiber.App, handler *handler.Handler) {
 	customer := app.Group("/product")
+	customer.Use(handler.VerifyAuth)
 	customer.Get("/", handler.ListProduct)
 	customer.Get("/count", handler.GetCountProduct)
 	customer.Get("/:id", handler.GetProduct)
