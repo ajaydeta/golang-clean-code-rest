@@ -30,6 +30,7 @@ func main() {
 	group.NewCustomerRequest(app, h)
 	group.NewProductRequest(app, h)
 	group.NewShoppingCartRequest(app, h)
+	group.NewTransactionRequest(app, h)
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello, World!")

@@ -7,4 +7,5 @@ type RepositoryRegistry interface {
 	GetProductRepository() repository.ProductRepository
 	GetRedisRepository() repository.RedisRepository
 	GetShoppingCartRepository() repository.ShoppingCartRepository
+	GetTransactionRepository() repository.TransactionRepository
 }

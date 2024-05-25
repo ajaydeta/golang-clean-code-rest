@@ -11,6 +11,7 @@ type ServiceRegistry struct {
 	customerSvc     service.CustomerService
 	productSvc      service.ProductService
 	shoppingCartSvc service.ShoppingCartService
+	transactionSvc  service.TransactionService
 }
 
 func NewServiceRegistry(reg oreg.RepositoryRegistry) ireg.ServiceRegistry {
@@ -18,6 +19,7 @@ func NewServiceRegistry(reg oreg.RepositoryRegistry) ireg.ServiceRegistry {
 		customerSvc:     iservice.NewAccountService(reg),
 		productSvc:      iservice.NewProductService(reg),
 		shoppingCartSvc: iservice.NewShoppingCartService(reg),
+		transactionSvc:  iservice.NewTransactionService(reg),
 	}
 }
 
@@ -31,4 +33,8 @@ func (s *ServiceRegistry) GetProductService() service.ProductService {
 
 func (s *ServiceRegistry) GetShoppingCartService() service.ShoppingCartService {
 	return s.shoppingCartSvc
+}
+
+func (s *ServiceRegistry) GetTransactionService() service.TransactionService {
+	return s.transactionSvc
 }

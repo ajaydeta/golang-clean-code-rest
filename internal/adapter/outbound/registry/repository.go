@@ -13,6 +13,7 @@ type RepositoryRegistry struct {
 	customerRepo     repository.CustomerRepository
 	productRepo      repository.ProductRepository
 	shoppingCardRepo repository.ShoppingCartRepository
+	transactionRepo  repository.TransactionRepository
 }
 
 func NewRepositoryRegistry(rdb *redis.Client, db *gorm.DB) registry.RepositoryRegistry {
@@ -23,6 +24,7 @@ func NewRepositoryRegistry(rdb *redis.Client, db *gorm.DB) registry.RepositoryRe
 		customerRepo:     outrepo.NewCustomerRepository(db, redisRepo),
 		productRepo:      outrepo.NewProductRepository(db),
 		shoppingCardRepo: outrepo.NewShoppingCartRepository(db),
+		transactionRepo:  outrepo.NewTransactionRepository(db),
 	}
 }
 
@@ -40,4 +42,8 @@ func (r *RepositoryRegistry) GetProductRepository() repository.ProductRepository
 
 func (r *RepositoryRegistry) GetShoppingCartRepository() repository.ShoppingCartRepository {
 	return r.shoppingCardRepo
+}
+
+func (r *RepositoryRegistry) GetTransactionRepository() repository.TransactionRepository {
+	return r.transactionRepo
 }

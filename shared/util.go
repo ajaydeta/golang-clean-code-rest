@@ -10,6 +10,9 @@ const (
 	AccessTokenSubject  = "access_token"
 	RefreshTokenSubject = "refresh_token"
 
+	PaymentTypeTransferBank = "1_transfer_bank"
+	PaymentTypeSupermarket  = "2_supermarket"
+
 	AccessTokenDuration  = time.Hour * 24
 	RefreshTokenDuration = time.Hour * 24 * 7
 )

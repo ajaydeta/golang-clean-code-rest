@@ -113,6 +113,27 @@ func (s *ShoppingCartRepository) FindById(ctx context.Context, id string) (*doma
 	return &result, nil
 }
 
+func (s *ShoppingCartRepository) FindByIds(ctx context.Context, ids []string) ([]domain.ShoppingCart, error) {
+	var (
+		err    error
+		model  = new(ShoppingCarts)
+		result []domain.ShoppingCart
+	)
+
+	err = s.db.
+		WithContext(ctx).
+		Where("id IN (?)", ids).
+		Preload("Product").
+		Find(model).
+		Error
+	if err != nil {
+		return nil, errors.Wrap(err, "failed Find")
+	}
+
+	result = model.ToDomain()
+	return result, nil
+}
+
 func (s *ShoppingCartRepository) FindAll(ctx context.Context, customerId string, filter domain.Filter) ([]domain.ShoppingCart, error) {
 	var (
 		err    error
