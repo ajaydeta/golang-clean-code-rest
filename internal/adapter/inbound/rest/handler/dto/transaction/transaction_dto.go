@@ -37,6 +37,7 @@ type (
 		Qty           float64   `json:"qty"`
 		Total         float64   `json:"total"`
 		CreatedAt     time.Time `json:"created_at"`
+		Product       *Product  `json:"product"`
 	}
 
 	Payment struct {
@@ -45,6 +46,13 @@ type (
 		PaymentType   string    `json:"payment_type"`
 		Paid          int       `json:"paid"`
 		CreatedAt     time.Time `json:"created_at"`
+	}
+
+	Product struct {
+		ID        string    `json:"id"`
+		Name      string    `json:"name"`
+		Price     float64   `json:"price"`
+		CreatedAt time.Time `json:"created_at"`
 	}
 )
 

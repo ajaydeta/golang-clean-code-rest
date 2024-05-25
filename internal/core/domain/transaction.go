@@ -23,6 +23,7 @@ type (
 		Qty           float64
 		Total         float64
 		CreatedAt     time.Time
+		Product       *Product
 	}
 
 	TransactionPayment struct {

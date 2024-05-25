@@ -101,3 +101,22 @@ func (t *TransactionService) PayoffTransaction(ctx context.Context, paymentId st
 
 	return paymentData, nil
 }
+
+func (t *TransactionService) FindId(ctx context.Context, id string) (*domain.Transaction, error) {
+	var (
+		result          *domain.Transaction
+		err             error
+		transactionRepo = t.repositoryRegistry.GetTransactionRepository()
+	)
+
+	result, err = transactionRepo.FindById(ctx, id)
+	if err != nil {
+		if errors.Is(err, shared.ErrNotFound) {
+			return nil, shared.ErrNotFound
+		}
+
+		return nil, errors.Wrap(err, "error transactionRepo.FindById")
+	}
+
+	return result, nil
+}

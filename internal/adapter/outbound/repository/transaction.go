@@ -36,6 +36,7 @@ type (
 		Qty           float64
 		Total         float64
 		CreatedAt     time.Time
+		Product       *Product
 	}
 
 	TransactionPayment struct {
@@ -106,4 +107,29 @@ func (t *TransactionRepository) PayTransaction(ctx context.Context, paymentId st
 		Where("id = ?", paymentId).
 		Updates(map[string]any{"paid": 1}).
 		Error
+}
+
+func (t *TransactionRepository) FindById(ctx context.Context, id string) (*domain.Transaction, error) {
+	var (
+		err    error
+		model  = new(Transaction)
+		result domain.Transaction
+	)
+
+	err = t.db.WithContext(ctx).
+		Where("id = ?", id).
+		Preload("TransactionItem.Product").
+		Preload("TransactionPayment").
+		First(&model).
+		Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, shared.ErrNotFound
+		}
+		return nil, errors.Wrap(err, "failed First")
+	}
+
+	copier.CopyWithOption(&result, model, copier.Option{DeepCopy: true})
+
+	return &result, nil
 }
