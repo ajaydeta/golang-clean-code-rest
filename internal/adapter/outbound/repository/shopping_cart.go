@@ -88,6 +88,31 @@ func (s *ShoppingCartRepository) FindByCustomerProductId(ctx context.Context, cu
 	return &result, nil
 }
 
+func (s *ShoppingCartRepository) FindById(ctx context.Context, id string) (*domain.ShoppingCart, error) {
+	var (
+		err    error
+		model  = new(ShoppingCart)
+		result domain.ShoppingCart
+	)
+
+	err = s.db.
+		WithContext(ctx).
+		Where("id = ?", id).
+		Preload("Product").
+		First(model).
+		Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, shared.ErrNotFound
+		}
+		return nil, errors.Wrap(err, "failed First")
+	}
+
+	copier.CopyWithOption(&result, model, copier.Option{DeepCopy: true})
+
+	return &result, nil
+}
+
 func (s *ShoppingCartRepository) FindAll(ctx context.Context, customerId string, filter domain.Filter) ([]domain.ShoppingCart, error) {
 	var (
 		err    error
@@ -125,6 +150,13 @@ func (s *ShoppingCartRepository) CountAll(ctx context.Context, customerId string
 	}
 
 	return count, nil
+}
+
+func (s *ShoppingCartRepository) DeleteById(ctx context.Context, id string) error {
+	return s.db.WithContext(ctx).
+		Where("id = ?", id).
+		Delete(&ShoppingCart{}).
+		Error
 }
 
 func (s *ShoppingCartRepository) getQueryList(customerId string, f domain.Filter, withLimit bool) *gorm.DB {

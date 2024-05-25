@@ -39,7 +39,7 @@ func (s *ShoppingCartService) Add(ctx context.Context, param *domain.ShoppingCar
 
 	shoppingCart, err = shoppingCartRepo.FindByCustomerProductId(ctx, customerId, param.ProductID)
 	if err != nil && !errors.Is(err, shared.ErrNotFound) {
-		return id, errors.Wrap(err, "ShoppingCart.FindByCustomerProductId")
+		return id, errors.Wrap(err, "Add.shoppingCartRepo.FindByCustomerProductId")
 	}
 
 	if shoppingCart != nil {
@@ -47,7 +47,7 @@ func (s *ShoppingCartService) Add(ctx context.Context, param *domain.ShoppingCar
 
 		err = shoppingCartRepo.Update(ctx, param)
 		if err != nil {
-			return id, errors.Wrap(err, "ShoppingCart.Update")
+			return id, errors.Wrap(err, "Add.shoppingCartRepo.Update")
 		}
 
 		return param.ID, nil
@@ -95,4 +95,21 @@ func (s *ShoppingCartService) CountAll(ctx context.Context, filter domain.Filter
 	}
 
 	return count, nil
+}
+
+func (s *ShoppingCartService) Delete(ctx context.Context, id string) error {
+	var (
+		err              error
+		shoppingCartRepo = s.repositoryRegistry.GetShoppingCartRepository()
+	)
+
+	_, err = shoppingCartRepo.FindById(ctx, id)
+	if err != nil {
+		if errors.Is(err, shared.ErrNotFound) {
+			return shared.ErrNotFound
+		}
+		return errors.Wrap(err, "error Delete.shoppingCartRepo.FindById")
+	}
+
+	return shoppingCartRepo.DeleteById(ctx, id)
 }

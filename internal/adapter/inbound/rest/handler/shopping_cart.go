@@ -64,3 +64,24 @@ func (h *Handler) GetCountShoppingCart(c *fiber.Ctx) error {
 	resp.SetCount(count).APIStatusSuccess()
 	return resp.Send(c)
 }
+
+func (h *Handler) DeleteShoppingCart(c *fiber.Ctx) error {
+	resp := shared.NewJSONResponse()
+	svc := h.GetServiceRegistry().GetShoppingCartService()
+
+	id := c.Params("id")
+
+	err := svc.Delete(c.Context(), id)
+	if err != nil {
+		if errors.Is(err, shared.ErrNotFound) {
+			resp.SetMessage("Shopping Cart Data Not Found").APIStatusNotFound()
+			return resp.Send(c)
+		}
+
+		resp.SetMessage("internal server error").SetReason(err)
+		return resp.Send(c)
+	}
+
+	resp.APIStatusSuccess()
+	return resp.Send(c)
+}

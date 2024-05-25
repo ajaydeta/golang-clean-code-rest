@@ -11,4 +11,5 @@ func NewShoppingCartRequest(app *fiber.App, handler *handler.Handler) {
 	shoppingCart.Post("/", handler.AddShoppingCard)
 	shoppingCart.Get("/", handler.ListShoppingCart)
 	shoppingCart.Get("/count", handler.GetCountShoppingCart)
+	shoppingCart.Delete("/:id", handler.DeleteShoppingCart)
 }
