@@ -21,6 +21,10 @@ type (
 		Password string `json:"password" validate:"required"`
 	}
 
+	RefreshTokenReq struct {
+		Token string `json:"token" validate:"required"`
+	}
+
 	SignInResp struct {
 		ID           string `json:"id"`
 		RefreshToken string `json:"refresh_token"`
@@ -40,6 +44,11 @@ func (c *RegisterCustomerReq) Validate() error {
 }
 
 func (c *SignInReq) Validate() error {
+	validate := validator.New(validator.WithRequiredStructEnabled())
+	return validate.Struct(c)
+}
+
+func (c *RefreshTokenReq) Validate() error {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	return validate.Struct(c)
 }
@@ -78,6 +87,20 @@ func (d DTO) SignInTransformIn(ctx *fiber.Ctx) (*domain.Customer, error) {
 		Email:    c.Email,
 		Password: c.Password,
 	}, nil
+}
+
+func (d DTO) RefreshTokenTransformIn(ctx *fiber.Ctx) (string, error) {
+	c := new(RefreshTokenReq)
+
+	if err := ctx.BodyParser(c); err != nil {
+		return "", err
+	}
+
+	if err := c.Validate(); err != nil {
+		return "", err
+	}
+
+	return c.Token, nil
 }
 
 func (d DTO) ToSignInResp(r *domain.SignIn) *SignInResp {

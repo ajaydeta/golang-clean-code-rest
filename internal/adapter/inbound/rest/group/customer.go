@@ -8,4 +8,5 @@ import (
 func NewCustomerRequest(app *fiber.App, handler *handler.Handler) {
 	app.Post("/register", handler.Register)
 	app.Post("/sign-in", handler.SignIn)
+	app.Post("/refresh-token", handler.RefreshToken)
 }

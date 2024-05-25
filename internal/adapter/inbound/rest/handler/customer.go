@@ -3,6 +3,7 @@ package handler
 import (
 	"github.com/gofiber/fiber/v2"
 	errors "github.com/rotisserie/eris"
+	"log"
 	customerDto "synapsis-challenge/internal/adapter/inbound/rest/handler/dto/customer"
 	"synapsis-challenge/shared"
 )
@@ -57,6 +58,26 @@ func (h *Handler) SignIn(c *fiber.Ctx) error {
 		}
 
 		return resp.Send(c)
+	}
+
+	return resp.SetData(dto.ToSignInResp(data)).APIStatusSuccess().Send(c)
+}
+
+func (h *Handler) RefreshToken(c *fiber.Ctx) error {
+	resp := shared.NewJSONResponse()
+	svc := h.GetServiceRegistry().GetCustomerService()
+
+	dto := customerDto.DTO{}
+	req, err := dto.RefreshTokenTransformIn(c)
+	if err != nil {
+		resp.SetReason(err).APIStatusBadRequest()
+		return resp.Send(c)
+	}
+
+	data, err := svc.RefreshToken(c.Context(), req)
+	if err != nil {
+		log.Println(err.Error())
+		return unauthorizedResponse(c)
 	}
 
 	return resp.SetData(dto.ToSignInResp(data)).APIStatusSuccess().Send(c)

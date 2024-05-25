@@ -10,4 +10,5 @@ type CustomerService interface {
 	SignIn(ctx context.Context, customer *domain.Customer) (*domain.SignIn, error)
 	VerifyToken(token string) (string, error)
 	SignOut(ctx context.Context, customer *domain.Customer) error
+	RefreshToken(ctx context.Context, token string) (*domain.SignIn, error)
 }

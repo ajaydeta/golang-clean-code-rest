@@ -193,6 +193,86 @@ func (i *CustomerService) SignOut(ctx context.Context, customer *domain.Customer
 	return nil
 }
 
+func (i *CustomerService) RefreshToken(ctx context.Context, token string) (*domain.SignIn, error) {
+	var (
+		result       *domain.SignIn
+		err          error
+		dataCustomer *domain.Customer
+
+		redisRepo = i.repositoryRegistry.GetRedisRepository()
+		repo      = i.repositoryRegistry.GetCustomerRepository()
+	)
+
+	validRefresh, claimsRefresh, err := verifyJWT(token)
+	if err != nil {
+		return result, err
+	}
+
+	if !validRefresh {
+		return result, errors.New("JWT access token is invalid")
+	}
+
+	refreshTokenPayload, err := decodeToken(claimsRefresh)
+	if err != nil {
+		return result, errors.Wrap(err, "failed decode refresh token claims")
+	}
+
+	if refreshTokenPayload.Subject != shared.RefreshTokenSubject {
+		return result, errors.New("JWT token is not refresh token")
+	}
+
+	expirationTime := time.Unix(refreshTokenPayload.ExpiresAt, 0)
+	if time.Now().After(expirationTime) {
+		return result, errors.New("access token is expired")
+	}
+
+	accessTokenKey, refreshTokenKey := getAuthRedisKey(refreshTokenPayload.ID)
+
+	refreshToken, err := redisRepo.GetString(refreshTokenKey)
+	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			return result, errors.New("refresh token not found")
+		}
+		return result, errors.Wrap(err, "error get refresh token from redis")
+	}
+
+	if refreshToken != token {
+		return result, errors.New("refresh token is invalid")
+	}
+
+	dataCustomer, err = repo.FindByID(ctx, refreshTokenPayload.ID)
+	if err != nil {
+		if errors.Is(err, shared.ErrNotFound) {
+			return result, shared.ErrNotFound
+		}
+
+		return result, errors.Wrap(err, "RefreshToken.FindByEmail")
+	}
+
+	accessToken, refreshToken, err := generateSignInToken(refreshTokenPayload.ID)
+	if err != nil {
+		return result, errors.Wrap(err, "RefreshToken.GenerateSignInToken")
+	}
+
+	err = redisRepo.Set(accessTokenKey, accessToken, shared.AccessTokenDuration)
+	if err != nil {
+		return result, errors.Wrap(err, "RefreshToken.Set.accessToken")
+	}
+
+	err = redisRepo.Set(refreshTokenKey, refreshToken, shared.RefreshTokenDuration)
+	if err != nil {
+		return result, errors.Wrap(err, "RefreshToken.Set.refreshToken")
+	}
+
+	result = &domain.SignIn{
+		RefreshToken: refreshToken,
+		AccessToken:  accessToken,
+		Customer:     dataCustomer,
+	}
+
+	return result, nil
+}
+
 func getAuthRedisKey(customerId string) (customerAccessToken, customerRefreshToken string) {
 	customerAccessToken = fmt.Sprintf("customerAccessToken:%s", customerId)
 	customerRefreshToken = fmt.Sprintf("customerRefreshToken:%s", customerId)
