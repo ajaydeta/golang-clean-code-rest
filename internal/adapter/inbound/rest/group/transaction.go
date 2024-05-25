@@ -9,4 +9,5 @@ func NewTransactionRequest(app *fiber.App, handler *handler.Handler) {
 	transactionCart := app.Group("/transaction")
 	transactionCart.Use(handler.VerifyAuth)
 	transactionCart.Post("/", handler.CreateTransaction)
+	transactionCart.Post("/payoff/:id", handler.PayoffTransaction)
 }

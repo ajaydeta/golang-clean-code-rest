@@ -6,6 +6,7 @@ import (
 	errors "github.com/rotisserie/eris"
 	"synapsis-challenge/internal/core/domain"
 	"synapsis-challenge/internal/core/port/outbound/registry"
+	"synapsis-challenge/shared"
 )
 
 type TransactionService struct {
@@ -72,4 +73,31 @@ func (t *TransactionService) CreateTransaction(ctx context.Context, data *domain
 	}
 
 	return insert, nil
+}
+
+func (t *TransactionService) PayoffTransaction(ctx context.Context, paymentId string) (*domain.TransactionPayment, error) {
+	var (
+		err             error
+		paymentData     *domain.TransactionPayment
+		transactionRepo = t.repositoryRegistry.GetTransactionRepository()
+	)
+
+	paymentData, err = transactionRepo.GetPaymentTransactionById(ctx, paymentId)
+	if err != nil {
+		if errors.Is(err, shared.ErrNotFound) {
+			return nil, shared.ErrNotFound
+		}
+		return nil, errors.Wrap(err, "PayoffTransaction.transactionRepo.GetPaymentTransactionById")
+	}
+
+	if paymentData.Paid == 1 {
+		return nil, shared.ErrAlreadyPaid
+	}
+
+	err = transactionRepo.PayTransaction(ctx, paymentId)
+	if err != nil {
+		return nil, errors.Wrap(err, "PayoffTransaction.transactionRepo.PayTransaction")
+	}
+
+	return paymentData, nil
 }

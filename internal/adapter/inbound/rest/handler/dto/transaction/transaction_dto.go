@@ -76,3 +76,10 @@ func (d DTO) ToCreateResp(r *domain.Transaction) *Response {
 
 	return result
 }
+
+func (d DTO) ToPaymentResp(r *domain.TransactionPayment) *Payment {
+	result := new(Payment)
+	copier.CopyWithOption(result, r, copier.Option{DeepCopy: true})
+
+	return result
+}

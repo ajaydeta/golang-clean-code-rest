@@ -25,3 +25,18 @@ func (h *Handler) CreateTransaction(c *fiber.Ctx) error {
 
 	return resp.SetData(respDto.ToCreateResp(transaction)).APIStatusSuccess().Send(c)
 }
+
+func (h *Handler) PayoffTransaction(c *fiber.Ctx) error {
+	resp := shared.NewJSONResponse()
+	svc := h.GetServiceRegistry().GetTransactionService()
+	respDto := transactionDto.DTO{}
+	id := c.Params("id")
+
+	payment, err := svc.PayoffTransaction(c.Context(), id)
+	if err != nil {
+		resp.SetMessage("internal server error").SetReason(err)
+		return resp.Send(c)
+	}
+
+	return resp.SetData(respDto.ToPaymentResp(payment)).APIStatusSuccess().Send(c)
+}
