@@ -9,4 +9,6 @@ func NewShoppingCartRequest(app *fiber.App, handler *handler.Handler) {
 	shoppingCart := app.Group("/shopping-cart")
 	shoppingCart.Use(handler.VerifyAuth)
 	shoppingCart.Post("/", handler.AddShoppingCard)
+	shoppingCart.Get("/", handler.ListShoppingCart)
+	shoppingCart.Get("/count", handler.GetCountShoppingCart)
 }

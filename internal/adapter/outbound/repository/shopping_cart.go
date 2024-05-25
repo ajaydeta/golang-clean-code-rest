@@ -23,13 +23,29 @@ type (
 		Notes      string
 		Qty        float64
 		CreatedAt  time.Time
+		Product    *Product
 	}
+
+	ShoppingCarts []ShoppingCart
 )
 
 func NewShoppingCartRepository(db *gorm.DB) repository.ShoppingCartRepository {
 	return &ShoppingCartRepository{
 		db: db,
 	}
+}
+
+func (l *ShoppingCarts) ToDomain() []domain.ShoppingCart {
+	if l == nil {
+		return make([]domain.ShoppingCart, 0)
+	}
+
+	res := make([]domain.ShoppingCart, len(*l))
+	for i, v := range *l {
+		copier.CopyWithOption(&res[i], v, copier.Option{DeepCopy: true})
+	}
+
+	return res
 }
 
 func (s *ShoppingCartRepository) Add(ctx context.Context, shoppingCart *domain.ShoppingCart) error {
@@ -70,4 +86,62 @@ func (s *ShoppingCartRepository) FindByCustomerProductId(ctx context.Context, cu
 	copier.CopyWithOption(&result, model, copier.Option{DeepCopy: true})
 
 	return &result, nil
+}
+
+func (s *ShoppingCartRepository) FindAll(ctx context.Context, customerId string, filter domain.Filter) ([]domain.ShoppingCart, error) {
+	var (
+		err    error
+		model  = new(ShoppingCarts)
+		result []domain.ShoppingCart
+	)
+
+	err = s.getQueryList(customerId, filter, true).
+		WithContext(ctx).
+		Select("distinct sp.*").
+		Preload("Product").
+		Find(model).
+		Error
+	if err != nil {
+		return nil, errors.Wrap(err, "failed Find")
+	}
+
+	result = model.ToDomain()
+	return result, nil
+}
+
+func (s *ShoppingCartRepository) CountAll(ctx context.Context, customerId string, filter domain.Filter) (int64, error) {
+	var (
+		err   error
+		count int64
+	)
+
+	err = s.getQueryList(customerId, filter, false).
+		WithContext(ctx).
+		Select("count(distinct sp.id) as count").
+		Count(&count).
+		Error
+	if err != nil {
+		return 0, errors.Wrap(err, "failed Count")
+	}
+
+	return count, nil
+}
+
+func (s *ShoppingCartRepository) getQueryList(customerId string, f domain.Filter, withLimit bool) *gorm.DB {
+	db := s.db.
+		Table("shopping_cart sp").
+		Where("sp.customer_id = ?", customerId)
+
+	if f.HasSearch() {
+		db = db.
+			Joins("JOIN product p ON p.id = sp.product_id").
+			Where("p.name LIKE ?", f.Search+"%")
+	}
+
+	if withLimit {
+		db = f.GetPagination(db).Order("sp.created_at desc")
+	}
+
+	return db
+
 }

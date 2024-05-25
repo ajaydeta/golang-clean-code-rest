@@ -64,3 +64,35 @@ func (s *ShoppingCartService) Add(ctx context.Context, param *domain.ShoppingCar
 
 	return id, nil
 }
+
+func (s *ShoppingCartService) FindAll(ctx context.Context, filter domain.Filter) ([]domain.ShoppingCart, error) {
+	var (
+		result           []domain.ShoppingCart
+		err              error
+		shoppingCartRepo = s.repositoryRegistry.GetShoppingCartRepository()
+		customerId       = ctx.Value("customerId").(string)
+	)
+
+	result, err = shoppingCartRepo.FindAll(ctx, customerId, filter)
+	if err != nil {
+		return result, errors.Wrap(err, "error FindAll.shoppingCartRepo.FindAll")
+	}
+
+	return result, nil
+}
+
+func (s *ShoppingCartService) CountAll(ctx context.Context, filter domain.Filter) (int64, error) {
+	var (
+		count            int64
+		err              error
+		shoppingCartRepo = s.repositoryRegistry.GetShoppingCartRepository()
+		customerId       = ctx.Value("customerId").(string)
+	)
+
+	count, err = shoppingCartRepo.CountAll(ctx, customerId, filter)
+	if err != nil {
+		return count, errors.Wrap(err, "error CountAll.shoppingCartRepo.CountAll")
+	}
+
+	return count, nil
+}

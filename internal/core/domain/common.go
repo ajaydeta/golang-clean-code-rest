@@ -41,3 +41,11 @@ func (f Filter) GetSortAndPaginationWithDefaultQuery(db *gorm.DB, defaultOrder s
 
 	return db.Order(orderQuery).Limit(int(f.Limit)).Offset(int(f.Offset))
 }
+
+func (f Filter) GetPagination(db *gorm.DB) *gorm.DB {
+	if f.Limit == 0 {
+		f.Limit = 10
+	}
+
+	return db.Limit(int(f.Limit)).Offset(int(f.Offset))
+}
