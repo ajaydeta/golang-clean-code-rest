@@ -8,14 +8,16 @@ import (
 )
 
 type ServiceRegistry struct {
-	customerSvc service.CustomerService
-	productSvc  service.ProductService
+	customerSvc     service.CustomerService
+	productSvc      service.ProductService
+	shoppingCartSvc service.ShoppingCartService
 }
 
 func NewServiceRegistry(reg oreg.RepositoryRegistry) ireg.ServiceRegistry {
 	return &ServiceRegistry{
-		customerSvc: iservice.NewAccountService(reg),
-		productSvc:  iservice.NewProductService(reg),
+		customerSvc:     iservice.NewAccountService(reg),
+		productSvc:      iservice.NewProductService(reg),
+		shoppingCartSvc: iservice.NewShoppingCartService(reg),
 	}
 }
 
@@ -25,4 +27,8 @@ func (s *ServiceRegistry) GetCustomerService() service.CustomerService {
 
 func (s *ServiceRegistry) GetProductService() service.ProductService {
 	return s.productSvc
+}
+
+func (s *ServiceRegistry) GetShoppingCartService() service.ShoppingCartService {
+	return s.shoppingCartSvc
 }

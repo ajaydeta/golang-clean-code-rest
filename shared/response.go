@@ -80,4 +80,5 @@ var (
 	ErrAlreadyExist    = errors.New("already exist")
 	ErrNotFound        = errors.New("not found")
 	ErrInvalidPassword = errors.New("invalid password")
+	ErrOutOfStock      = errors.New("out of stock")
 )

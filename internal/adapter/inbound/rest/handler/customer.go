@@ -19,7 +19,7 @@ func (h *Handler) Register(c *fiber.Ctx) error {
 		return resp.Send(c)
 	}
 
-	id, err := svc.RegisterCustomer(c.UserContext(), req)
+	id, err := svc.RegisterCustomer(c.Context(), req)
 	if err != nil {
 		if errors.Is(err, shared.ErrAlreadyExist) {
 			resp.SetMessage("Email already exists").SetCode(fiber.StatusBadRequest)
@@ -44,7 +44,7 @@ func (h *Handler) SignIn(c *fiber.Ctx) error {
 		return resp.Send(c)
 	}
 
-	data, err := svc.SignIn(c.UserContext(), req)
+	data, err := svc.SignIn(c.Context(), req)
 	if err != nil {
 
 		switch {

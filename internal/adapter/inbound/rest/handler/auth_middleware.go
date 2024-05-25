@@ -16,11 +16,13 @@ func (h *Handler) VerifyAuth(c *fiber.Ctx) error {
 
 	token = strings.Replace(token, "Bearer ", "", -1)
 
-	err := svc.VerifyToken(token)
+	customerId, err := svc.VerifyToken(token)
 	if err != nil {
 		log.Println(err.Error())
 		return unauthorizedResponse(c)
 	}
+
+	c.Context().SetUserValue("customerId", customerId)
 
 	return c.Next()
 }

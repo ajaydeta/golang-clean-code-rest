@@ -13,7 +13,7 @@ func (h *Handler) ListProduct(c *fiber.Ctx) error {
 	svc := h.GetServiceRegistry().GetProductService()
 
 	filter := respDto.GetListProductFilter(c)
-	products, err := svc.FindAll(c.UserContext(), filter)
+	products, err := svc.FindAll(c.Context(), filter)
 	if err != nil {
 		resp.SetMessage("internal server error").SetReason(err)
 		return resp.Send(c)
@@ -29,7 +29,7 @@ func (h *Handler) GetCountProduct(c *fiber.Ctx) error {
 	svc := h.GetServiceRegistry().GetProductService()
 
 	filter := respDto.GetListProductFilter(c)
-	count, err := svc.CountAll(c.UserContext(), filter)
+	count, err := svc.CountAll(c.Context(), filter)
 	if err != nil {
 		resp.SetMessage("internal server error").SetReason(err)
 		return resp.Send(c)
@@ -44,7 +44,7 @@ func (h *Handler) GetProduct(c *fiber.Ctx) error {
 	svc := h.GetServiceRegistry().GetProductService()
 	respDto := productDto.DTO{}
 
-	product, err := svc.FindId(c.UserContext(), c.Params("id"))
+	product, err := svc.FindId(c.Context(), c.Params("id"))
 	if err != nil {
 		if errors.Is(err, shared.ErrNotFound) {
 			return resp.APIStatusNotFound().Send(c)

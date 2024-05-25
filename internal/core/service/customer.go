@@ -120,70 +120,73 @@ func (i *CustomerService) SignIn(ctx context.Context, customer *domain.Customer)
 	return result, nil
 }
 
-func (i *CustomerService) VerifyToken(token string) error {
+func (i *CustomerService) VerifyToken(token string) (string, error) {
 	var (
-		err       error
-		redisRepo = i.repositoryRegistry.GetRedisRepository()
+		err        error
+		redisRepo  = i.repositoryRegistry.GetRedisRepository()
+		customerId string
 	)
 
 	validAccess, claimsAccess, err := verifyJWT(token)
 	if err != nil {
-		return err
+		return customerId, err
 	}
 
 	if !validAccess {
-		return errors.New("JWT access token is invalid")
+		return customerId, errors.New("JWT access token is invalid")
 	}
 
 	accessTokenPayload, err := decodeToken(claimsAccess)
 	if err != nil {
-		return errors.Wrap(err, "failed decode access token claims")
+		return customerId, errors.Wrap(err, "failed decode access token claims")
 	}
 
 	if accessTokenPayload.Subject != shared.AccessTokenSubject {
-		return errors.New("JWT token is not access token")
+		return customerId, errors.New("JWT token is not access token")
 	}
 
 	expirationTime := time.Unix(accessTokenPayload.ExpiresAt, 0)
 	if time.Now().After(expirationTime) {
-		return errors.New("access token is expired")
+		return customerId, errors.New("access token is expired")
 	}
 
 	accessTokenKey, refreshTokenKey := getAuthRedisKey(accessTokenPayload.ID)
 
 	exist, err := redisRepo.IsExist(accessTokenKey)
 	if err != nil {
-		return errors.Wrap(err, "error check redis key")
+		return customerId, errors.Wrap(err, "error check redis key")
 	}
 
 	if !exist {
-		return errors.New("user token not found")
+		return customerId, errors.New("user token not found")
 	}
 
 	refreshToken, err := redisRepo.GetString(refreshTokenKey)
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
-			return errors.New("refresh token not found")
+			return customerId, errors.New("refresh token not found")
 		}
 
-		return errors.New("error get refresh token from redis")
+		return customerId, errors.New("error get refresh token from redis")
 	}
 
 	validRefresh, _, err := verifyJWT(refreshToken)
 	if err != nil {
-		return errors.New("failed verify JWT refresh token")
+		return customerId, errors.New("failed verify JWT refresh token")
 	}
 
 	if !validRefresh {
-		return errors.New("JWT token is invalid")
+		return customerId, errors.New("JWT token is invalid")
 	}
 
 	err = redisRepo.Set(refreshTokenKey, refreshToken, shared.RefreshTokenDuration)
 	if err != nil {
-		return errors.New("error set jwt refresh_token to redis")
+		return customerId, errors.New("error set jwt refresh_token to redis")
 	}
 
-	return nil
+	customerId = accessTokenPayload.ID
+
+	return customerId, nil
 }
 
 func (i *CustomerService) SignOut(ctx context.Context, customer *domain.Customer) error {

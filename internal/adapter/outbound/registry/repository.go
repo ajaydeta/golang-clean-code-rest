@@ -9,18 +9,20 @@ import (
 )
 
 type RepositoryRegistry struct {
-	redisRepo    repository.RedisRepository
-	customerRepo repository.CustomerRepository
-	productRepo  repository.ProductRepository
+	redisRepo        repository.RedisRepository
+	customerRepo     repository.CustomerRepository
+	productRepo      repository.ProductRepository
+	shoppingCardRepo repository.ShoppingCartRepository
 }
 
 func NewRepositoryRegistry(rdb *redis.Client, db *gorm.DB) registry.RepositoryRegistry {
 	redisRepo := outrepo.NewRedisRepository(rdb)
 
 	return &RepositoryRegistry{
-		redisRepo:    redisRepo,
-		customerRepo: outrepo.NewCustomerRepository(db, redisRepo),
-		productRepo:  outrepo.NewProductRepository(db),
+		redisRepo:        redisRepo,
+		customerRepo:     outrepo.NewCustomerRepository(db, redisRepo),
+		productRepo:      outrepo.NewProductRepository(db),
+		shoppingCardRepo: outrepo.NewShoppingCartRepository(db),
 	}
 }
 
@@ -34,4 +36,8 @@ func (r *RepositoryRegistry) GetCustomerRepository() repository.CustomerReposito
 
 func (r *RepositoryRegistry) GetProductRepository() repository.ProductRepository {
 	return r.productRepo
+}
+
+func (r *RepositoryRegistry) GetShoppingCartRepository() repository.ShoppingCartRepository {
+	return r.shoppingCardRepo
 }
