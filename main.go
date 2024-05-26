@@ -33,9 +33,11 @@ func main() {
 	group.NewShoppingCartRequest(app, h)
 	group.NewTransactionRequest(app, h)
 
-	app.Post("/migrate_seed", func(c *fiber.Ctx) error {
-		return cmd.MigrateAndSeed(db)
-	})
+	err := cmd.MigrateAndSeed(db)
+	if err != nil {
+		panic(err)
+		return
+	}
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello, World!")
