@@ -101,12 +101,12 @@ func (i *CustomerService) SignIn(ctx context.Context, customer *domain.Customer)
 		return result, errors.Wrap(err, "SignIn.GenerateSignInToken")
 	}
 
-	err = redisRepo.Set(accessTokenKey, accessToken, shared.AccessTokenDuration)
+	err = redisRepo.SetString(accessTokenKey, accessToken, shared.AccessTokenDuration)
 	if err != nil {
 		return result, errors.Wrap(err, "SignIn.Set.accessToken")
 	}
 
-	err = redisRepo.Set(refreshTokenKey, refreshToken, shared.RefreshTokenDuration)
+	err = redisRepo.SetString(refreshTokenKey, refreshToken, shared.RefreshTokenDuration)
 	if err != nil {
 		return result, errors.Wrap(err, "SignIn.Set.refreshToken")
 	}
@@ -179,7 +179,7 @@ func (i *CustomerService) VerifyToken(token string) (string, error) {
 		return customerId, errors.New("JWT token is invalid")
 	}
 
-	err = redisRepo.Set(refreshTokenKey, refreshToken, shared.RefreshTokenDuration)
+	err = redisRepo.SetString(refreshTokenKey, refreshToken, shared.RefreshTokenDuration)
 	if err != nil {
 		return customerId, errors.New("error set jwt refresh_token to redis")
 	}
@@ -236,7 +236,7 @@ func (i *CustomerService) RefreshToken(ctx context.Context, token string) (*doma
 		return result, errors.Wrap(err, "error get refresh token from redis")
 	}
 
-	if refreshToken != token {
+	if refreshTokenKey != token {
 		return result, errors.New("refresh token is invalid")
 	}
 
@@ -254,12 +254,12 @@ func (i *CustomerService) RefreshToken(ctx context.Context, token string) (*doma
 		return result, errors.Wrap(err, "RefreshToken.GenerateSignInToken")
 	}
 
-	err = redisRepo.Set(accessTokenKey, accessToken, shared.AccessTokenDuration)
+	err = redisRepo.SetString(accessTokenKey, accessToken, shared.AccessTokenDuration)
 	if err != nil {
 		return result, errors.Wrap(err, "RefreshToken.Set.accessToken")
 	}
 
-	err = redisRepo.Set(refreshTokenKey, refreshToken, shared.RefreshTokenDuration)
+	err = redisRepo.SetString(refreshTokenKey, refreshToken, shared.RefreshTokenDuration)
 	if err != nil {
 		return result, errors.Wrap(err, "RefreshToken.Set.refreshToken")
 	}

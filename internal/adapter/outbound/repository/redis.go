@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/redis/go-redis/v9"
 	"synapsis-challenge/shared"
 	"time"
@@ -16,8 +17,21 @@ func NewRedisRepository(rdb *redis.Client) *RedisRepository {
 	return &RedisRepository{rdb: rdb}
 }
 
-func (i *RedisRepository) Set(key string, value interface{}, expiration time.Duration) error {
+func (i *RedisRepository) SetObj(key string, value interface{}, expiration time.Duration) error {
+	by, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+
+	return i.rdb.Set(context.Background(), key, string(by), expiration).Err()
+}
+
+func (i *RedisRepository) SetString(key string, value string, expiration time.Duration) error {
 	return i.rdb.Set(context.Background(), key, value, expiration).Err()
+}
+
+func (i *RedisRepository) SetInt64(key string, value int64, expiration time.Duration) error {
+	return i.rdb.Set(context.Background(), key, fmt.Sprintf("%d", value), expiration).Err()
 }
 
 func (i *RedisRepository) GetString(key string) (string, error) {

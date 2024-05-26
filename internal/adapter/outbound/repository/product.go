@@ -13,7 +13,8 @@ import (
 
 type (
 	ProductRepository struct {
-		db *gorm.DB
+		db    *gorm.DB
+		cache repository.RedisRepository
 	}
 
 	Product struct {
@@ -39,9 +40,17 @@ type (
 	Products []Product
 )
 
-func NewProductRepository(db *gorm.DB) repository.ProductRepository {
+const (
+	productPrefixCacheKey         = "cacheProduct:"
+	productPrefixCacheKeyFindById = productPrefixCacheKey + "FindById:"
+	productPrefixCacheKeyFindAll  = productPrefixCacheKey + "FindAll:"
+	productPrefixCacheKeyCountAll = productPrefixCacheKey + "CountAll:"
+)
+
+func NewProductRepository(db *gorm.DB, cache repository.RedisRepository) repository.ProductRepository {
 	return &ProductRepository{
-		db: db,
+		db:    db,
+		cache: cache,
 	}
 }
 
@@ -65,6 +74,11 @@ func (i *ProductRepository) FindById(ctx context.Context, id string) (*domain.Pr
 		result domain.Product
 	)
 
+	cacheKey := shared.GetCacheKey(productPrefixCacheKeyFindById, id)
+	if err = i.cache.GetObject(cacheKey, &result); err == nil {
+		return &result, nil
+	}
+
 	err = i.db.
 		WithContext(ctx).
 		Where("id = ?", id).
@@ -80,6 +94,8 @@ func (i *ProductRepository) FindById(ctx context.Context, id string) (*domain.Pr
 
 	copier.CopyWithOption(&result, model, copier.Option{DeepCopy: true})
 
+	go i.cache.SetObj(cacheKey, result, shared.CacheTtl)
+
 	return &result, nil
 }
 
@@ -89,6 +105,11 @@ func (i *ProductRepository) FindAll(ctx context.Context, f domain.ProductFilter)
 		model  = new(Products)
 		result []domain.Product
 	)
+
+	cacheKey := shared.GetCacheKey(productPrefixCacheKeyFindAll, f)
+	if err = i.cache.GetObject(cacheKey, &result); err == nil {
+		return result, nil
+	}
 
 	err = i.getQueryList(f, true).
 		WithContext(ctx).
@@ -101,6 +122,9 @@ func (i *ProductRepository) FindAll(ctx context.Context, f domain.ProductFilter)
 	}
 
 	result = model.ToDomain()
+
+	go i.cache.SetObj(cacheKey, result, shared.CacheTtl)
+
 	return result, nil
 }
 
@@ -110,6 +134,11 @@ func (i *ProductRepository) CountAll(ctx context.Context, f domain.ProductFilter
 		count int64
 	)
 
+	cacheKey := shared.GetCacheKey(productPrefixCacheKeyCountAll, f)
+	if count, err = i.cache.GetInt64(cacheKey); err == nil {
+		return count, nil
+	}
+
 	err = i.getQueryList(f, false).
 		WithContext(ctx).
 		Select("count(distinct p.id) as count").
@@ -118,6 +147,8 @@ func (i *ProductRepository) CountAll(ctx context.Context, f domain.ProductFilter
 	if err != nil {
 		return 0, errors.Wrap(err, "failed Count")
 	}
+
+	go i.cache.SetInt64(cacheKey, count, shared.CacheTtl)
 
 	return count, nil
 }

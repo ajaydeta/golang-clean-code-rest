@@ -1,6 +1,7 @@
 package shared
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -15,6 +16,7 @@ const (
 
 	AccessTokenDuration  = time.Hour * 24
 	RefreshTokenDuration = time.Hour * 24 * 7
+	CacheTtl             = time.Minute * 30
 )
 
 func GetPageAndPerPage(limit, offset int64) (int64, int64) {
@@ -45,4 +47,14 @@ func SplitStringBySeparator(in string, sep string) []string {
 	}
 
 	return sepStr
+}
+
+func GetCacheKey(prefix string, i interface{}) string {
+	toString := fmt.Sprintf("%+v", i)
+	noWhiteSpace := strings.ReplaceAll(toString, " ", "_")
+	noOpenBracket := strings.ReplaceAll(noWhiteSpace, "{", "")
+	noCloseBracket := strings.ReplaceAll(noOpenBracket, "}", "")
+	result := prefix + noCloseBracket
+
+	return result
 }

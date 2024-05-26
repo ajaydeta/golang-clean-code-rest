@@ -22,7 +22,7 @@ func NewRepositoryRegistry(rdb *redis.Client, db *gorm.DB) registry.RepositoryRe
 	return &RepositoryRegistry{
 		redisRepo:        redisRepo,
 		customerRepo:     outrepo.NewCustomerRepository(db, redisRepo),
-		productRepo:      outrepo.NewProductRepository(db),
+		productRepo:      outrepo.NewProductRepository(db, redisRepo),
 		shoppingCardRepo: outrepo.NewShoppingCartRepository(db),
 		transactionRepo:  outrepo.NewTransactionRepository(db),
 	}
