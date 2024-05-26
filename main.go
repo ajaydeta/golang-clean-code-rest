@@ -4,6 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
+	"synapsis-challenge/cmd"
 	"synapsis-challenge/config"
 	ireg "synapsis-challenge/internal/adapter/inbound/registry"
 	"synapsis-challenge/internal/adapter/inbound/rest/group"
@@ -32,8 +33,16 @@ func main() {
 	group.NewShoppingCartRequest(app, h)
 	group.NewTransactionRequest(app, h)
 
+	app.Post("/migrate_seed", func(c *fiber.Ctx) error {
+		return cmd.MigrateAndSeed(db)
+	})
+
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello, World!")
+	})
+
+	app.Get("/stack", func(c *fiber.Ctx) error {
+		return c.JSON(app.Stack())
 	})
 
 	app.Listen(":3000")
