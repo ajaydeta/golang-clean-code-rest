@@ -1,4 +1,4 @@
-# synapsis-challenge
+# golang-clean-code-rest
 
 ## About
 This repository is implement clean code architecture and Restful API concept. 
