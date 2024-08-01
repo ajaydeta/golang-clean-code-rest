@@ -18,7 +18,7 @@ For database schema you can see in below:
 1. Setup MySQL and redis server in your local computer
 2. Clone this repository
     ```bash
-   git clone https://github.com/ajaydeta/synapsis-challenge.git
+    https://github.com/ajaydeta/golang-clean-code-rest.git
    ```
 3. Installing main project dependency
     ```bash
@@ -33,7 +33,7 @@ For database schema you can see in below:
 1. Setup MySQL and redis server in your local computer
 2. Clone this repository
     ```bash
-   git clone https://github.com/ajaydeta/synapsis-challenge.git
+   https://github.com/ajaydeta/golang-clean-code-rest.git
    ```
 3. Compose Up
    ```bash
@@ -48,5 +48,5 @@ Then you can see the API documentation in [here](https://www.postman.com/ajaydet
 
 ## Author
 Ajay Deta:
-- [Github](https://github.com/ajaydeta/synapsis-challenge)
+- [Github](https://github.com/ajaydeta/golang-clean-code-rest.git)
 - [LinkedIn](https://www.linkedin.com/in/ajay-deta/)
